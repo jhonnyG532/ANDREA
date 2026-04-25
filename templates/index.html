@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎂 ¡Feliz Cumpleaños, {{ nombre }}!</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="loading-screen" id="loading">
+        <div class="loading-content">
+            <div class="gift-icon">🎁</div>
+            <div class="loading-text">Preparando tu sorpresa...</div>
+            <div class="loading-bar">
+                <div class="loading-progress"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="ambient-bg"></div>
+
+    <header class="header">
+        <div class="header-logo">{{ nombre }}</div>
+        <div class="header-date">24 de Abril 🎂</div>
+    </header>
+
+    <main class="main-content">
+        <section class="hero-section" id="hero">
+            <div class="section-bg"></div>
+            <div class="hero-badge">🎉 ¡Hoy es tu día! 🎂</div>
+            <h1 class="hero-title">
+                ¡Feliz Cumpleaños!
+                <span class="highlight">{{ nombre }}!</span>
+            </h1>
+            <p class="hero-subtitle">Desliza para descubrir todo lo que tengo para ti ✨</p>
+            <button class="btn-cta" onclick="document.getElementById('messages').scrollIntoView({behavior:'smooth'})">
+                💝 Ver mensajes
+            </button>
+        </section>
+
+        <section class="messages-section" id="messages">
+            <div class="section-bg"></div>
+            <div class="section-header">
+                <div class="section-eyebrow">Palabras del corazón</div>
+                <h2 class="section-title">Para ti, mi hermanita 💕</h2>
+            </div>
+            
+            <div class="envelope-container">
+                <div class="envelope-wrapper" onclick="openEnvelope()">
+                    <div class="envelope-back"></div>
+                    <div class="letter" id="letter">
+                        <div class="letter-header">
+                            <div class="letter-seal">💌</div>
+                            <div class="letter-to">Para mi {{ nombre }}...</div>
+                        </div>
+                        <div class="letter-messages">
+                            {% for msg in messages %}
+                            <div class="letter-message" style="animation-delay: {{ loop.index0 * 0.2 }}s">
+                                <div class="message-title">{{ msg.title }}</div>
+                                <div class="message-content">{{ msg.content }}</div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <div class="letter-footer">
+                            <div class="letter-signature">Con todo mi amor</div>
+                            <div class="letter-hearts">
+                                <span>💖</span><span>💗</span><span>💕</span><span>💝</span><span>💞</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        {% if photos %}
+        <section class="gallery-section" id="gallery">
+            <div class="section-bg"></div>
+            <div class="section-header">
+                <div class="section-eyebrow">Recuerdos</div>
+                <h2 class="section-title">📸 La cumpleañera 📸</h2>
+            </div>
+            
+            <div class="gallery-frame">
+                {% for photo in photos %}
+                <div class="gallery-frame-item" onclick="openLightbox({{ loop.index0 }})">
+                    <div class="frame-border"></div>
+                    <div class="frame-inner"></div>
+                    <div class="gallery-frame-photo">
+                        <img src="{{ url_for('static', filename='uploads/' + photo.filename) }}" alt="{{ photo.caption }}" loading="lazy">
+                        <div class="frame-corners">
+                            <div class="corner corner-tl"></div>
+                            <div class="corner corner-tr"></div>
+                            <div class="corner corner-bl"></div>
+                            <div class="corner corner-br"></div>
+                        </div>
+                        <div class="frame-icon">🔍</div>
+                        <div class="frame-caption">{{ photo.caption or 'Ver foto' }}</div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <div class="lightbox" id="lightbox">
+                <button class="lightbox-close" onclick="closeLightbox()">✕</button>
+                <button class="lightbox-nav prev" onclick="changeLightbox(-1)">❮</button>
+                <div class="lightbox-content">
+                    <div class="lightbox-frame">
+                        <div class="lightbox-inner-frame">
+                            <div class="lightbox-main">
+                                {% for photo in photos %}
+                                <img src="{{ url_for('static', filename='uploads/' + photo.filename) }}" alt="" data-index="{{ loop.index0 }}" loading="lazy">
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    <p class="lightbox-caption" id="lightboxCaption"></p>
+                    <div class="lightbox-thumbnails">
+                        {% for photo in photos %}
+                        <div class="lightbox-thumb {% if loop.first %}active{% endif %}" onclick="openLightbox({{ loop.index0 }})">
+                            <img src="{{ url_for('static', filename='uploads/' + photo.filename) }}" alt="">
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <button class="lightbox-nav next" onclick="changeLightbox(1)">❯</button>
+                <div class="lightbox-counter">
+                    <span id="lightboxCurrent">1</span> / <span>{{ photos|length }}</span>
+                </div>
+            </div>
+        </section>
+        {% endif %}
+
+        <section class="wishes-section" id="wishes">
+            <div class="section-bg"></div>
+            <div class="section-header">
+                <div class="section-eyebrow">Mis deseos</div>
+                <h2 class="section-title">Para tu nuevo año 🌟</h2>
+            </div>
+            
+            <div class="grid-2">
+                <div class="card">
+                    <div class="card-icon">🌟</div>
+                    <h3 class="card-title">Logros Increíbles</h3>
+                    <p class="card-text">Que cada meta que te propongas se haga realidad. Tu determinación es inspiradora.</p>
+                </div>
+                <div class="card">
+                    <div class="card-icon">💖</div>
+                    <h3 class="card-title">Amor Verdadero</h3>
+                    <p class="card-text">Que el amor llene tu vida de momentos hermosos y felicidad infinita.</p>
+                </div>
+                <div class="card">
+                    <div class="card-icon">🌈</div>
+                    <h3 class="card-title">Aventuras Épicas</h3>
+                    <p class="card-text">Que cada día traiga nuevas aventuras que te hagan sonreír y disfrutar.</p>
+                </div>
+                <div class="card">
+                    <div class="card-icon">✨</div>
+                    <h3 class="card-title">Magia Constante</h3>
+                    <p class="card-text">Que la vida te sorprenda siempre con momentos mágicos e inolvidables.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="cake-section" id="cake">
+            <div class="section-bg"></div>
+            <div class="section-header">
+                <div class="section-eyebrow">¡Hora de celebrar!</div>
+                <h2 class="section-title">🎂 ¡Sopla las velas! 🎂</h2>
+            </div>
+            
+            <div class="cake-display">
+                <div class="cake-candles">
+                    <div class="candle">
+                        <div class="flame"></div>
+                    </div>
+                </div>
+                <div class="cake-body">
+                    <div class="cake-layer top"></div>
+                    <div class="cake-layer middle"></div>
+                    <div class="cake-layer bottom"></div>
+                </div>
+            </div>
+            
+            <button class="btn-cta" onclick="blowCandles()" style="margin-top: 40px;">
+                💨 ¡Sopla!
+            </button>
+        </section>
+
+        <section class="celebration-section" id="celebration">
+            <div class="section-bg"></div>
+            <div class="section-header">
+                <h2 class="section-title">🎉 ¡Felicidades! 🎉</h2>
+                <p class="section-subtitle">Que este nuevo año de vida sea el mejor de todos</p>
+            </div>
+            
+            <button class="btn-cta pulse" onclick="startCelebration()">
+                🎊 ¡Celebrar! 🎊
+            </button>
+        </section>
+
+        <footer class="footer-section">
+            <div class="footer-hearts">
+                <span>💕</span><span>💖</span><span>💗</span><span>💝</span><span>💖</span><span>💕</span>
+            </div>
+            <p class="footer-message">Hecho con amor para ti 💕</p>
+            
+        </footer>
+    </main>
+
+    <div class="fiu-fiu-badge">
+        <span class="badge-text">💖 Mi bebita fiu fiu 💖</span>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>

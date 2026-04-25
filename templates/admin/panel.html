@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Administración</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        :root {
+            --primary: #ff6b9d;
+            --secondary: #c44569;
+            --gold: #ffd700;
+        }
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1a0a2e 0%, #2d1b4e 50%, #1a0a2e 100%);
+            font-family: 'Poppins', sans-serif;
+            color: white;
+            padding: 20px;
+        }
+        .admin-header {
+            max-width: 1200px;
+            margin: 0 auto 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .admin-header h1 {
+            font-size: 2rem;
+            background: linear-gradient(135deg, #ff6b9d, #ffd700);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(255, 107, 157, 0.4);
+        }
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        .btn-danger {
+            background: rgba(255, 82, 82, 0.2);
+            color: #ff5252;
+            border: 1px solid rgba(255, 82, 82, 0.5);
+        }
+        .btn-danger:hover {
+            background: rgba(255, 82, 82, 0.3);
+        }
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 0.8rem;
+        }
+        .admin-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            gap: 30px;
+        }
+        .section {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 25px;
+        }
+        .section-title {
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .alert {
+            padding: 12px 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+        }
+        .alert-error {
+            background: rgba(255, 82, 82, 0.2);
+            border: 1px solid rgba(255, 82, 82, 0.5);
+            color: #ff5252;
+        }
+        .alert-success {
+            background: rgba(76, 175, 80, 0.2);
+            border: 1px solid rgba(76, 175, 80, 0.5);
+            color: #4caf50;
+        }
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 12px 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            color: white;
+            font-size: 1rem;
+            font-family: inherit;
+            transition: all 0.3s;
+        }
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: rgba(255, 255, 255, 0.15);
+        }
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        .messages-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .message-item {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            cursor: grab;
+            transition: all 0.3s;
+        }
+        .message-item:hover {
+            border-color: var(--primary);
+            background: rgba(255, 255, 255, 0.1);
+        }
+        .message-item.sortable-ghost {
+            opacity: 0.5;
+        }
+        .message-item.sortable-chosen {
+            background: rgba(255, 107, 157, 0.2);
+        }
+        .message-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .message-title {
+            font-weight: 600;
+            color: var(--gold);
+        }
+        .message-actions {
+            display: flex;
+            gap: 8px;
+        }
+        .message-content {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.95rem;
+            line-height: 1.6;
+            white-space: pre-line;
+        }
+        .photos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+        }
+        .photo-item {
+            position: relative;
+            aspect-ratio: 1;
+            border-radius: 15px;
+            overflow: hidden;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s;
+            cursor: grab;
+        }
+        .photo-item:hover {
+            border-color: var(--primary);
+            transform: scale(1.02);
+        }
+        .photo-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .photo-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 10px;
+            background: linear-gradient(transparent, rgba(0,0,0,0.8));
+            font-size: 0.8rem;
+        }
+        .photo-delete {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 28px;
+            height: 28px;
+            background: rgba(255, 82, 82, 0.9);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .photo-item:hover .photo-delete {
+            opacity: 1;
+        }
+        .upload-area {
+            border: 2px dashed rgba(255, 255, 255, 0.3);
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        .upload-area:hover {
+            border-color: var(--primary);
+            background: rgba(255, 107, 157, 0.1);
+        }
+        .upload-area input {
+            display: none;
+        }
+        .upload-label {
+            cursor: pointer;
+            color: rgba(255, 255, 255, 0.7);
+        }
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+        .modal.show {
+            display: flex;
+        }
+        .modal-content {
+            background: linear-gradient(135deg, #1a0a2e, #2d1b4e);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 500px;
+            width: 100%;
+        }
+        .modal-title {
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+        }
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+        .drag-handle {
+            color: rgba(255, 255, 255, 0.4);
+            margin-right: 10px;
+            cursor: grab;
+        }
+        @media (max-width: 768px) {
+            .admin-header {
+                flex-direction: column;
+                text-align: center;
+            }
+            .header-actions {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-header">
+        <h1>⚙️ Panel de Administración</h1>
+        <div class="header-actions">
+            <a href="{{ url_for('home') }}" class="btn btn-secondary">👀 Ver Página</a>
+            <a href="{{ url_for('admin_logout') }}" class="btn btn-danger">🚪 Cerrar Sesión</a>
+        </div>
+    </div>
+    
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">{{ message }}</div>
+        {% endfor %}
+    {% endwith %}
+    
+    <div class="admin-container">
+        <div class="section">
+            <div class="section-title">
+                <span>📝 Configuración General</span>
+            </div>
+            <form method="POST" action="{{ url_for('admin_config') }}">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="nombre">Nombre</label>
+                        <input type="text" id="nombre" name="nombre" value="{{ nombre }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="titulo">Título Principal</label>
+                        <input type="text" id="titulo" name="titulo" value="{{ titulo }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="subtitulo">Subtítulo</label>
+                        <input type="text" id="subtitulo" name="subtitulo" value="{{ subtitulo }}">
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary" style="margin-top: 15px;">💾 Guardar Configuración</button>
+            </form>
+        </div>
+        
+        <div class="section">
+            <div class="section-title">
+                <span>💌 Mensajes</span>
+                <button class="btn btn-primary btn-sm" onclick="openModal('message')">➕ Agregar</button>
+            </div>
+            <div class="messages-list" id="messages-list">
+                {% for msg in messages %}
+                <div class="message-item" data-id="{{ msg.id }}">
+                    <div class="message-header">
+                        <span class="drag-handle">⋮⋮</span>
+                        <span class="message-title">{{ msg.title }}</span>
+                        <div class="message-actions">
+                            <button class="btn btn-secondary btn-sm" onclick="editMessage({{ msg.id }}, '{{ msg.title }}', `{{ msg.content }}`)">✏️ Editar</button>
+                            <a href="{{ url_for('admin_delete_message', id=msg.id) }}" class="btn btn-danger btn-sm" onclick="return confirm('¿Eliminar este mensaje?')">🗑️</a>
+                        </div>
+                    </div>
+                    <div class="message-content">{{ msg.content }}</div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <div class="section">
+            <div class="section-title">
+                <span>📸 Fotos</span>
+            </div>
+            <form method="POST" action="{{ url_for('admin_upload') }}" enctype="multipart/form-data" class="upload-area">
+                <input type="file" id="photo-input" name="file" accept="image/*" onchange="this.form.submit()">
+                <input type="text" name="caption" placeholder="Descripción de la foto" style="margin-bottom: 15px; max-width: 300px;">
+                <label for="photo-input" class="upload-label">
+                    <div style="font-size: 2rem; margin-bottom: 10px;">📷</div>
+                    <div>Click para subir foto</div>
+                    <div style="font-size: 0.8rem; opacity: 0.6;">PNG, JPG, GIF, WEBP</div>
+                </label>
+            </form>
+            
+            <div class="photos-grid" id="photos-grid">
+                {% for photo in photos %}
+                <div class="photo-item" data-id="{{ photo.id }}">
+                    <img src="{{ url_for('static', filename='uploads/' + photo.filename) }}" alt="{{ photo.caption }}">
+                    <div class="photo-overlay">{{ photo.caption }}</div>
+                    <a href="{{ url_for('admin_delete_photo', id=photo.id) }}" class="photo-delete" onclick="return confirm('¿Eliminar esta foto?')">✕</a>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <div class="section">
+            <div class="section-title">
+                <span>🔐 Cambiar Contraseña</span>
+            </div>
+            <form method="POST" action="{{ url_for('admin_change_password') }}" style="max-width: 400px;">
+                <div class="form-group">
+                    <label for="current_password">Contraseña Actual</label>
+                    <input type="password" id="current_password" name="current_password" required>
+                </div>
+                <div class="form-group">
+                    <label for="new_password">Nueva Contraseña</label>
+                    <input type="password" id="new_password" name="new_password" required>
+                </div>
+                <div class="form-group">
+                    <label for="confirm_password">Confirmar Nueva</label>
+                    <input type="password" id="confirm_password" name="confirm_password" required>
+                </div>
+                <button type="submit" class="btn btn-primary">💾 Actualizar Contraseña</button>
+            </form>
+        </div>
+    </div>
+    
+    <div class="modal" id="message-modal">
+        <div class="modal-content">
+            <div class="modal-title" id="modal-title">Agregar Mensaje</div>
+            <form method="POST" id="message-form" action="{{ url_for('admin_add_message') }}">
+                <input type="hidden" name="_method" value="">
+                <div class="form-group">
+                    <label for="msg-title">Título</label>
+                    <input type="text" id="msg-title" name="title" required>
+                </div>
+                <div class="form-group">
+                    <label for="msg-content">Contenido</label>
+                    <textarea id="msg-content" name="content" required></textarea>
+                </div>
+            </form>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+                <button class="btn btn-primary" onclick="document.getElementById('message-form').submit()">Guardar</button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+    <script>
+        new Sortable(document.getElementById('messages-list'), {
+            animation: 200,
+            handle: '.message-item',
+            ghostClass: 'sortable-ghost',
+            chosenClass: 'sortable-chosen',
+            onEnd: function(evt) {
+                const order = [...document.querySelectorAll('.message-item')].map(el => el.dataset.id);
+                fetch('{{ url_for("admin_reorder_messages") }}', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                    body: 'order[]=' + order.join('&order[]=')
+                });
+            }
+        });
+        
+        new Sortable(document.getElementById('photos-grid'), {
+            animation: 200,
+            ghostClass: 'sortable-ghost',
+            onEnd: function(evt) {
+                const order = [...document.querySelectorAll('.photo-item')].map(el => el.dataset.id);
+                fetch('{{ url_for("admin_reorder_photos") }}', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                    body: 'order[]=' + order.join('&order[]=')
+                });
+            }
+        });
+        
+        function openModal() {
+            document.getElementById('msg-title').value = '';
+            document.getElementById('msg-content').value = '';
+            document.getElementById('message-form').action = '{{ url_for("admin_add_message") }}';
+            document.getElementById('modal-title').textContent = 'Agregar Mensaje';
+            document.getElementById('message-modal').classList.add('show');
+        }
+        
+        function editMessage(id, title, content) {
+            document.getElementById('msg-title').value = title;
+            document.getElementById('msg-content').value = content.replace(/`/g, '');
+            document.getElementById('message-form').action = '/admin/message/edit/' + id;
+            document.getElementById('modal-title').textContent = 'Editar Mensaje';
+            document.getElementById('message-modal').classList.add('show');
+        }
+        
+        function closeModal() {
+            document.getElementById('message-modal').classList.remove('show');
+        }
+        
+        document.getElementById('message-modal').addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
+    </script>
+</body>
+</html>
