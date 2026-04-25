@@ -2,13 +2,23 @@ let envelopeOpen = false;
 let currentLightboxIndex = 0;
 let flameVisible = true;
 
-// Loading Screen
-window.addEventListener('load', () => {
-    setTimeout(() => {
-        const loading = document.getElementById('loading');
-        if (loading) loading.classList.add('hidden');
-    }, 2500);
+// Loading Screen - se oculta siempre
+window.addEventListener('load', function() {
+    setTimeout(function() {
+        var loading = document.getElementById('loading');
+        if (loading) {
+            loading.classList.add('hidden');
+        }
+    }, 100);
 });
+
+// Fallback por si load no dispara
+setTimeout(function() {
+    var loading = document.getElementById('loading');
+    if (loading) {
+        loading.classList.add('hidden');
+    }
+}, 3000);
 
 // Envelope
 function openEnvelope() {
@@ -72,8 +82,38 @@ function startCelebration() {
     }, 300);
 }
 
-// Lightbox
-function openLightbox(index) {
+// Lazy loading con thumbnails
+document.addEventListener('DOMContentLoaded', function() {
+    const lazyImages = document.querySelectorAll('img[data-src]');
+    
+    if ('IntersectionObserver' in window) {
+        const observer = new IntersectionObserver(function(entries) {
+            entries.forEach(function(entry) {
+                if (entry.isIntersecting) {
+                    const img = entry.target;
+                    const src = img.getAttribute('data-src');
+                    if (src) {
+                        img.src = src;
+                        img.removeAttribute('data-src');
+                    }
+                    observer.unobserve(img);
+                }
+            });
+        }, { rootMargin: '50px' });
+        
+        lazyImages.forEach(function(img) {
+            observer.observe(img);
+        });
+    } else {
+        lazyImages.forEach(function(img) {
+            const src = img.getAttribute('data-src');
+            if (src) {
+                img.src = src;
+                img.removeAttribute('data-src');
+            }
+        });
+    }
+});
     const lightbox = document.getElementById('lightbox');
     const mainImages = lightbox?.querySelectorAll('.lightbox-main img');
     const thumbs = lightbox?.querySelectorAll('.lightbox-thumb');

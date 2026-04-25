@@ -1,7 +1,8 @@
-from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
+from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify, send_file, Response
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
+from functools import wraps
 import os
 import uuid
 from datetime import datetime
@@ -11,10 +12,12 @@ app.config['SECRET_KEY'] = 'cumple-andrea-2024-secret-key'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///cumple.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['UPLOAD_FOLDER'] = 'static/uploads'
+app.config['THUMB_FOLDER'] = 'static/thumbs'
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
-app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
+app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg', 'gif', 'bmp', 'tiff', 'webp'}
 
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+os.makedirs(app.config['THUMB_FOLDER'], exist_ok=True)
 
 db = SQLAlchemy(app)
 
@@ -166,9 +169,17 @@ def admin_upload():
         return redirect(url_for('admin_panel'))
     
     if file and allowed_file(file.filename):
+        from PIL import Image
         ext = file.filename.rsplit('.', 1)[1].lower()
-        filename = f"{uuid.uuid4().hex}.{ext}"
-        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        filename = f"{uuid.uuid4().hex}.webp"
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        thumbpath = os.path.join(app.config['THUMB_FOLDER'], filename)
+        
+        img = Image.open(file)
+        img.save(filepath, 'WEBP', quality=85, method=6)
+        
+        thumb = img.resize((400, 400), Image.LANCZOS)
+        thumb.save(thumbpath, 'WEBP', quality=70, method=6)
         
         max_order = db.session.query(db.func.max(Photo.order_num)).scalar() or 0
         photo = Photo(filename=filename, caption=caption, order_num=max_order + 1)

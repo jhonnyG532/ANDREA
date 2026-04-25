@@ -8,15 +8,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="loading-screen" id="loading">
-        <div class="loading-content">
-            <div class="gift-icon">🎁</div>
-            <div class="loading-text">Preparando tu sorpresa...</div>
-            <div class="loading-bar">
-                <div class="loading-progress"></div>
-            </div>
-        </div>
+<div class="loading-screen" id="loading" style="display:none;">
+    <div class="loading-content">
+        <div class="gift-icon">🎁</div>
+        <div class="loading-text">Preparando tu sorpresa...</div>
     </div>
+</div>
 
     <div class="ambient-bg"></div>
 
@@ -87,7 +84,7 @@
                     <div class="frame-border"></div>
                     <div class="frame-inner"></div>
                     <div class="gallery-frame-photo">
-                        <img src="{{ url_for('static', filename='uploads/' + photo.filename) }}" alt="{{ photo.caption }}" loading="lazy">
+                        <img src="{{ url_for('static', filename='thumbs/' + photo.filename) }}" data-src="{{ url_for('static', filename='uploads/' + photo.filename) }}" alt="{{ photo.caption }}" loading="lazy">
                         <div class="frame-corners">
                             <div class="corner corner-tl"></div>
                             <div class="corner corner-tr"></div>

@@ -66,6 +66,7 @@ body {
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
+    display: none !important;
 }
 
 .loading-content {
@@ -113,8 +114,13 @@ body {
 }
 
 @media (max-width: 600px) {
-    .loading-screen.hidden {
-        display: none;
+    .loading-screen.hidden,
+    .loading-screen.fade-out,
+    #loading,
+    #loading.hidden {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
     }
 }
 
@@ -711,6 +717,7 @@ section {
     object-fit: cover;
     transition: transform 0.5s ease;
     will-change: transform;
+    background: var(--indigo);
 }
 
 .gallery-frame-item:hover .gallery-frame-photo {
